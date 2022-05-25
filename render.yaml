@@ -1,5 +1,5 @@
 services:
-  - name: dnilasor-saelor
+  - name: saelor
     type: web
     env: python
     repo: https://github.com/dnilasor/saleor
@@ -23,7 +23,8 @@ services:
           name: saelor-db
           property: connectionString
       - key: REDIS_URL
-        fromService:
+        fromService: 
+          type: redis
           name: saelor-redis
           property: connectionString
 #        - key: AWS_MEDIA_BUCKET_NAME
