@@ -27,6 +27,8 @@ services:
           type: redis
           name: saelor-redis
           property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.9.0
 #        - key: AWS_MEDIA_BUCKET_NAME
 #          value: 
 #        - key: AWS_ACCESS_KEY_ID
