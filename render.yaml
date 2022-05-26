@@ -30,7 +30,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.9.0
       - key: ALLOWED_CLIENTS_HOSTS
-        value: *
+        value: "*"
 #        - key: AWS_MEDIA_BUCKET_NAME
 #          value: 
 #        - key: AWS_ACCESS_KEY_ID
