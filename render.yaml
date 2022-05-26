@@ -29,7 +29,7 @@ services:
           property: connectionString
       - key: PYTHON_VERSION
         value: 3.9.0
-      - key: ALLOWED_CLIENTS_HOSTS
+      - key: ALLOWED_CLIENT_HOSTS
         value: "*"
 #        - key: AWS_MEDIA_BUCKET_NAME
 #          value: 
