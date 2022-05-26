@@ -3,7 +3,7 @@ services:
     type: web
     env: python
     repo: https://github.com/dnilasor/saleor
-    buildCommand: pip install -r requirements.txt && python manage.py migrate --no-input
+    buildCommand: pip3 install -r requirements.txt && python manage.py migrate --no-input
     startCommand: gunicorn --bind :$PORT --workers 4 --worker-class uvicorn.workers.UvicornWorker saleor.asgi:application
     envVars:
       - key: DJANGO_SETTINGS_MODULE
