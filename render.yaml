@@ -4,7 +4,7 @@ services:
     env: python
     repo: https://github.com/dnilasor/saleor
     buildCommand: pip3 install -r requirements.txt && python manage.py migrate --no-input
-    startCommand: gunicorn --bind :$PORT --workers 4 --worker-class uvicorn.workers.UvicornWorker saleor.asgi:application
+    startCommand: render-start.sh
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: saleor.settings
@@ -15,7 +15,7 @@ services:
       - key: DEFAULT_FROM_EMAIL
         value: noreply@example.com
       - key: ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL
-        value: false
+        value: False
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
