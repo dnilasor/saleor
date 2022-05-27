@@ -3,7 +3,7 @@ services:
     type: web
     env: python
     repo: https://github.com/dnilasor/saleor
-    buildCommand: pip3 install -r requirements.txt && python manage.py migrate --no-input
+    buildCommand: ./render-build.sh
     startCommand: ./render-start.sh
     envVars:
       - key: DJANGO_SETTINGS_MODULE
