@@ -2,6 +2,7 @@ import ast
 import os.path
 import warnings
 from datetime import timedelta
+import json
 
 import dj_database_url
 import dj_email_url
@@ -176,7 +177,7 @@ if not SECRET_KEY and DEBUG:
     warnings.warn("SECRET_KEY not configured, using a random temporary key.")
     SECRET_KEY = get_random_secret_key()
 
-RSA_PRIVATE_KEY = print(os.environ.get("RSA_PRIVATE_KEY"))
+RSA_PRIVATE_KEY = json.dumps(os.environ.get("RSA_PRIVATE_KEY"))
 RSA_PRIVATE_PASSWORD = os.environ.get("RSA_PRIVATE_PASSWORD", None)
 JWT_MANAGER_PATH = os.environ.get(
     "JWT_MANAGER_PATH", "saleor.core.jwt_manager.JWTManager"
