@@ -46,8 +46,10 @@ services:
     env: docker
     repo: https://github.com/dnilasor/react-storefront
     envVars:
-      - key: NEXT_PUBLIC_API_URI=http://localhost:8000/graphql/
-        value: NEXT_PUBLIC_HOMEPAGE_MENU=navbar
+      - key: NEXT_PUBLIC_API_URI=
+        value: http://localhost:8000/graphql/
+      - key: NEXT_PUBLIC_HOMEPAGE_MENU
+        value: navbar
 
 
 
