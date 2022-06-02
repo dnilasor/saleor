@@ -7,4 +7,6 @@ python -c 'import os; print(os.environ.get("ALLOWED_HOSTS"))'
 echo $ALLOWED_HOSTS
 echo $RENDER_EXTERNAL_HOSTNAME
 
+python manage.py migrate && python manage.py populatedb --createsuperuser --withoutimages
+
 gunicorn --bind :$PORT --workers 4 --worker-class uvicorn.workers.UvicornWorker saleor.asgi:application
