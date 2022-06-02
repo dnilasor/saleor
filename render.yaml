@@ -45,12 +45,6 @@ services:
     name: saleor-storefront
     env: docker
     repo: https://github.com/dnilasor/react-storefront
-    envVars:
-      - key: NEXT_PUBLIC_API_URI
-        value: http://localhost:8000/graphql/
-      - key: NEXT_PUBLIC_HOMEPAGE_MENU
-        value: navbar
-
 
 
 databases:
