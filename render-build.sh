@@ -5,4 +5,3 @@ export RSA_PRIVATE_KEY=$(cat /etc/secrets/saleor-key)
 
 pip3 install -r requirements.txt
 python manage.py migrate --no-input
-python manage.py populatedb --createsuperuser --withoutimages
