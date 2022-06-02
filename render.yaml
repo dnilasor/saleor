@@ -45,6 +45,7 @@ services:
     name: saleor-storefront
     env: docker
     repo: https://github.com/dnilasor/react-storefront
+    healthCheckPath: /
     envVars:
       - key: NEXT_PUBLIC_API_URI=
         value: http://localhost:8000/graphql/
