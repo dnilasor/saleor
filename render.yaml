@@ -45,6 +45,9 @@ services:
     name: saleor-storefront
     env: docker
     repo: https://github.com/dnilasor/react-storefront
+    envVars:
+      - key: NEXT_PUBLIC_API_URI
+        value: https://saelor.onrender.com/graphql/
   
 
 
