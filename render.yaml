@@ -29,6 +29,7 @@ services:
     name: celery-worker
     env: python
     repo: https://github.com/dnilasor/saleor
+    plan: standard #TODO: investigate how to configure celery so that it does not need 2GB of RAM
     buildCommand: ./render-build.sh
     startCommand: ./render-start.sh worker
     envVars:
