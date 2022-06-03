@@ -41,10 +41,7 @@ services:
     name: saelor-redis
     ipAllowList: [] # only allow internal connections
   
-  - type: web
-    name: saleor-storefront
-    env: docker
-    repo: https://github.com/dnilasor/react-storefront
+
 
 
 databases:
