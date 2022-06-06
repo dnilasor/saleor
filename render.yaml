@@ -64,7 +64,7 @@ services:
     name: saleor-dashboard
     env: node
     repo: https://github.com/dnilasor/saleor-dashboard.git
-    buildCommand: npm run build
+    buildCommand: npm i && npm run build
     startCommand: npm start
     envVars:
       - key: API_URI
