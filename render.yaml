@@ -4,20 +4,8 @@ services:
     env: python
     repo: https://github.com/dnilasor/saleor
     buildCommand: ./render-build.sh
-    startCommand: ./render-start.sh
+    startCommand: ./render-start.sh server
     envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: saleor.settings
-      - key: DEBUG
-        value: True
-      - key: NPM_CONFIG_PRODUCTION
-        value: false
-      - key: DEFAULT_FROM_EMAIL
-        value: noreply@example.com
-      - key: ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL
-        value: False
-      - key: SECRET_KEY
-        generateValue: true
       - key: DATABASE_URL
         fromDatabase:
           name: saelor-db
@@ -27,8 +15,6 @@ services:
           type: redis
           name: saelor-redis
           property: connectionString
-      - key: PYTHON_VERSION
-        value: 3.9.0
       - key: ALLOWED_CLIENT_HOSTS
         value: "*"
 #        - key: AWS_MEDIA_BUCKET_NAME
@@ -37,6 +23,27 @@ services:
 #          value:
 #        - key: AWS_SECRET_ACCESS_KEY
 #          value: 
+      - fromGroup: saleor-settings
+
+  - type: worker
+    name: celery-worker
+    env: python
+    repo: https://github.com/dnilasor/saleor
+    plan: standard #TODO: investigate how to configure celery so that it does not need 2GB of RAM
+    buildCommand: ./render-build.sh
+    startCommand: ./render-start.sh worker
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: saelor-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: saelor-redis
+          property: connectionString
+      - fromGroup: saleor-settings
+
   - type: redis
     name: saelor-redis
     ipAllowList: [] # only allow internal connections
@@ -59,5 +66,25 @@ services:
 databases:
     - name: saelor-db
       ipAllowList: [] # only allow internal connections
+
+envVarGroups:
+  - name: saleor-settings
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: saleor.settings
+      - key: DEBUG
+        value: True
+      - key: NPM_CONFIG_PRODUCTION
+        value: false
+      - key: DEFAULT_FROM_EMAIL
+        value: noreply@example.com
+      - key: ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+
+
 
 # python manage.py migrate && python manage.py populatedb --createsuperuser --withoutimages
