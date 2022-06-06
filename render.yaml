@@ -64,8 +64,7 @@ services:
     name: saleor-dashboard
     env: node
     repo: https://github.com/dnilasor/saleor-dashboard.git
-    buildCommand: npm i && npm run build
-    startCommand: npm start
+    startCommand: npm i && npm run build
     envVars:
       - key: API_URI
         value: https://saelor.onrender.com/graphql/
