@@ -54,12 +54,12 @@ def get_product_attributes(product):
                 },
                 "values": [
                     {
-                        "name": value.get("name"),
-                        "value": value.get("value"),
-                        "slug": value.get("slug"),
-                        "file_url": value.get("file_url"),
+                        "name": value.name,
+                        "value": value.value,
+                        "slug": value.slug,
+                        "file_url": value.file_url,
                     }
-                    for value in attr.values.values("name", "value", "slug", "file_url")
+                    for value in attr.values.all()
                 ],
             }
         )
@@ -244,7 +244,7 @@ def get_default_order_payload(order: "Order", redirect_url: str = ""):
         {
             "id": to_global_id_or_none(order),
             "token": order.id,  # DEPRECATED: will be removed in Saleor 4.0.
-            "number": order.id,
+            "number": order.number,
             "channel_slug": order.channel.slug,
             "created": str(order.created_at),
             "shipping_price_net_amount": order.shipping_price_net_amount,
@@ -262,6 +262,9 @@ def get_default_order_payload(order: "Order", redirect_url: str = ""):
             **get_discounts_payload(order),
         }
     )
+    # Deprecated: override private_metadata with empty dict as it shouldn't be returned
+    # in the payload (see SALEOR-7046). Should be removed in Saleor 4.0.
+    order_payload["private_metadata"] = {}
     return order_payload
 
 

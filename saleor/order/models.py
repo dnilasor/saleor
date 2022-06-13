@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.core.validators import MinValueValidator
 from django.db import connection, models
 from django.db.models import JSONField  # type: ignore
@@ -27,10 +28,17 @@ from ..discount import DiscountValueType
 from ..discount.models import Voucher
 from ..giftcard.models import GiftCard
 from ..payment import ChargeStatus, TransactionKind
-from ..payment.model_helpers import get_subtotal, get_total_authorized
+from ..payment.model_helpers import get_subtotal
 from ..payment.models import Payment
 from ..shipping.models import ShippingMethod
-from . import FulfillmentStatus, OrderEvents, OrderOrigin, OrderStatus
+from . import (
+    FulfillmentStatus,
+    OrderAuthorizeStatus,
+    OrderChargeStatus,
+    OrderEvents,
+    OrderOrigin,
+    OrderStatus,
+)
 
 
 class OrderQueryset(models.QuerySet):
@@ -61,7 +69,7 @@ class OrderQueryset(models.QuerySet):
         return self.filter(
             Exists(payments.filter(order_id=OuterRef("id"))),
             status__in=statuses,
-            total_gross_amount__lte=F("total_paid_amount"),
+            total_gross_amount__lte=F("total_charged_amount"),
         )
 
     def ready_to_capture(self):
@@ -98,6 +106,18 @@ class Order(ModelWithMetadata):
     updated_at = models.DateTimeField(auto_now=True, editable=False, db_index=True)
     status = models.CharField(
         max_length=32, default=OrderStatus.UNFULFILLED, choices=OrderStatus.CHOICES
+    )
+    authorize_status = models.CharField(
+        max_length=32,
+        default=OrderAuthorizeStatus.NONE,
+        choices=OrderAuthorizeStatus.CHOICES,
+        db_index=True,
+    )
+    charge_status = models.CharField(
+        max_length=32,
+        default=OrderChargeStatus.NONE,
+        choices=OrderChargeStatus.CHOICES,
+        db_index=True,
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -237,12 +257,22 @@ class Order(ModelWithMetadata):
         currency_field="currency",
     )
 
-    total_paid_amount = models.DecimalField(
+    total_charged_amount = models.DecimalField(
         max_digits=settings.DEFAULT_MAX_DIGITS,
         decimal_places=settings.DEFAULT_DECIMAL_PLACES,
         default=0,
     )
-    total_paid = MoneyField(amount_field="total_paid_amount", currency_field="currency")
+    total_authorized_amount = models.DecimalField(
+        max_digits=settings.DEFAULT_MAX_DIGITS,
+        decimal_places=settings.DEFAULT_DECIMAL_PLACES,
+        default=0,
+    )
+    total_authorized = MoneyField(
+        amount_field="total_authorized_amount", currency_field="currency"
+    )
+    total_charged = MoneyField(
+        amount_field="total_charged_amount", currency_field="currency"
+    )
 
     voucher = models.ForeignKey(
         Voucher, blank=True, null=True, related_name="+", on_delete=models.SET_NULL
@@ -258,7 +288,7 @@ class Order(ModelWithMetadata):
     )
     redirect_url = models.URLField(blank=True, null=True)
     search_document = models.TextField(blank=True, default="")
-
+    search_vector = SearchVectorField(blank=True, null=True)
     objects = models.Manager.from_queryset(OrderQueryset)()
 
     class Meta:
@@ -273,6 +303,10 @@ class Order(ModelWithMetadata):
                 opclasses=["gin_trgm_ops"],
             ),
             GinIndex(
+                name="order_tsearch",
+                fields=["search_vector"],
+            ),
+            GinIndex(
                 name="order_email_search_gin",
                 # `opclasses` and `fields` should be the same length
                 fields=["user_email"],
@@ -281,19 +315,13 @@ class Order(ModelWithMetadata):
         ]
 
     def is_fully_paid(self):
-        return self.total_paid >= self.total.gross
+        return self.total_charged >= self.total.gross
 
     def is_partly_paid(self):
-        return self.total_paid_amount > 0
+        return self.total_charged_amount > 0
 
     def get_customer_email(self):
         return self.user.email if self.user_id else self.user_email
-
-    def update_total_paid(self):
-        self.total_paid_amount = (
-            sum(self.payments.values_list("captured_amount", flat=True)) or 0
-        )
-        self.save(update_fields=["total_paid_amount", "updated_at"])
 
     def _index_billing_phone(self):
         return self.billing_address.phone
@@ -397,16 +425,8 @@ class Order(ModelWithMetadata):
         return len(payments) == 0
 
     @property
-    def total_authorized(self):
-        return get_total_authorized(self.payments.all(), self.currency)
-
-    @property
-    def total_captured(self):
-        return self.total_paid
-
-    @property
     def total_balance(self):
-        return self.total_captured - self.total.gross
+        return self.total_charged - self.total.gross
 
     def get_total_weight(self, _lines=None):
         return self.weight
