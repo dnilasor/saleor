@@ -55,6 +55,24 @@ services:
         source: /
         destination: /dashboard/index.html
 
+  - name: saleor-storefront
+    type: web
+    env: node
+    repo: https://github.com/saleor/react-storefront
+    buildCommand: >
+      pnpm install
+      && NEXT_PUBLIC_API_URI=$TEMP_NEXT_PUBLIC_API_URL/graphql/ pnpm run build
+      && pnpm run postbuild
+    startCommand: NEXT_PUBLIC_API_URI=$TEMP_NEXT_PUBLIC_API_URL/graphql/ pnpm start
+    envVars:
+      - key: TEMP_NEXT_PUBLIC_API_URL
+        fromService:
+          name: saleor
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: NEXT_PUBLIC_IMAGE_CONVERSION_FORMATS
+        value: image/avif,image/webp
+
 databases:
   - name: saleor-db
     ipAllowList: [] # only allow connections from services in this Render account
