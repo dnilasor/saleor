@@ -33,6 +33,25 @@ services:
   - name: saleor-redis
     type: redis
     ipAllowList: []
+  
+  - name: saleor-dashboard
+    type: web
+    env: static
+    repo: https://github.com/saleor/saleor-dashboard
+    buildCommand: npm install && API_URI="$TEMP_API_URI/graphql/" npm run build
+    staticPublishPath: ./build/
+    envVars:
+      - key: TEMP_API_URI
+        fromService:
+          name: saleor
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: APP_MOUNT_URI
+        value: /dashboard/
+    routes:
+      - type: rewrite
+        source: /
+        destination: /dashboard/index.html
 
 databases:
   - name: saleor-db
