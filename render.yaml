@@ -1,5 +1,5 @@
 services:
-  - name: saelor
+  - name: saleor
     type: web
     env: python
     repo: https://github.com/crcastle/saleor
