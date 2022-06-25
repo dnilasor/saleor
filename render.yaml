@@ -104,6 +104,8 @@ services:
         value: False
       - key: SECRET_KEY
         generateValue: true
+      - key: CLOUDAMQP_URL
+        sync: false
 
   - type: cron
     name: exchange-rates
